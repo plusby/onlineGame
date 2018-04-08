@@ -8,7 +8,7 @@
           href="https://vuejs.org"
           target="_blank"
         >
-          Change
+          Change2
         </a>
       </li>
       <li>
