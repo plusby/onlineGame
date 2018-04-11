@@ -6,8 +6,16 @@ import sendPost from "../components/community/sendPost/sendPost"
 import tip from "../components/community/tip/tip"
 import successTip from "../components/community/tip/successTip"
 import wzsjIndex from '../components/wzsj/wzsjIndex/wzsjIndex'
+import resource from 'vue-resource'
+import VueLazyLoad from 'vue-lazyload'
 
 Vue.use(Router)
+Vue.use(resource)
+Vue.use(VueLazyLoad,{
+	preLoad:1,
+	error:'../../../img/commonImg/loading.jpg',
+	loading:'../../../img/commonImg/loading.jpg'
+})
 
 export default new Router({
   routes: [

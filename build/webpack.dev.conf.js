@@ -10,6 +10,14 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
 
+//加载本地数据文件
+var appData=require('../src/data/communityIndex.json')
+//获取下面的数据
+var data=appData.data
+
+
+
+
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
 
@@ -42,7 +50,17 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     quiet: true, // necessary for FriendlyErrorsPlugin
     watchOptions: {
       poll: config.dev.poll,
-    }
+    },
+    //找到devServer,添加
+		before(app) {
+		  app.get('/api/data', (req, res) => {
+		    res.json({
+		      // 这里是你的json内容
+		      errno: 0,
+		      data: data
+		    })
+		  })
+		}
   },
   plugins: [
     new webpack.DefinePlugin({

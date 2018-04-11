@@ -1,17 +1,19 @@
 <template>
 	<div class="maskCommunity">
 		<div class="maskCommunity_content">
-			<textarea class="maskCommunity_content_textarea" name="content" placeholder="说两句..." autofocus="autofocus"></textarea>
+			<textarea ref="textarea" class="maskCommunity_content_textarea" name="content" placeholder="说两句..." autofocus="autofocus"></textarea>
 	        <p>
 	        	 <a href="javascript:;" class="maskCommunity_content_btn maskCommunity_content_cancel" v-on:click="maskCommunityCancel()" >取消</a>
-	        	 <a href="javascript:;" class="maskCommunity_content_btn maskCommunity_content_commit">发送</a>
+	        	 <a href="javascript:;" class="maskCommunity_content_btn maskCommunity_content_commit" @click="replyBtn()">发送</a>
 	        </p>
-	     
+	     	<p class="prompt" v-show="prompt">输入的内容不能为空！！</p>
 		</div>
+		
 	</div>
 </template>
 
 <script>
+	
 	export default{
 		props:{
 			maskflage:{
@@ -20,11 +22,30 @@
 		},
 		data(){
 			return{
-				flage:this.maskflage
+				flage:this.maskflage,
+				prompt:false
 			}
 		},
 		methods:{
 			maskCommunityCancel(){
+				this.closeMask()
+			},
+			replyBtn(){
+				if(!this.$refs.textarea.value){
+					this.prompt=true
+					setTimeout(()=>{
+						this.prompt=false
+					},1000)
+					return 
+				}else{
+					this.$emit("backmsg",this.$refs.textarea.value)
+					this.closeMask()
+					this.$refs.textarea.value=""
+				}
+				
+			},
+			//关闭显示框
+			closeMask(){
 				if(this.flage){
 					this.flage=false
 				}
@@ -84,5 +105,17 @@
 	.maskCommunity_content_commit{
 		   float: right;
     		background: #ff7e19;
+	}
+	.prompt{
+		font-size: 0.14rem;
+		line-height: 0.3rem;
+		color: #fff;
+		text-align: center;
+		width: 50%;
+		background: #202020;
+		position: absolute;
+		top: 30%;
+		left: 50%;
+		transform: translate(-50%,0);
 	}
 </style>

@@ -1,12 +1,12 @@
 <template>
-	<div class="communityIndex">
+	<div class="communityIndex" v-if="data[0]">
 		<div class="communityIndex_top">
 			<div class="communityIndex_top_ico">
 				<img src="../../../img/teamIndexImg/comments_topic.jpg" alt="" />
 			</div>
 			<div class="communityIndex_top_msg">
-				<h4>用户名 <span>主楼</span></h4>
-				<p>2017/11/27 14:22 </p>
+				<h4>{{data[0].username}} <span>主楼</span></h4>
+				<p>{{data[0].time}}</p>
 			</div>
 			<div class="communityIndex_top_logo">
 				<img src="../../../img/teamIndexImg/game_icon.png" alt="" />
@@ -15,9 +15,9 @@
 		</div>
 		<!--communityIndex_top_topic-->
 		<div class="communityIndex_top_topic">
-			<h3><em>精华</em><span>我们的游戏人生 特别企划：FPS真正的演绎</span></h3>
+			<h3><em>精华</em><span>{{data[0].post.postName}}</span></h3>
 			<div class="communityIndex_top_topic_desc clearfloat">
-				<p class="communityIndex_top_topic_desc_view">浏览 <span>12568</span></p>
+				<p class="communityIndex_top_topic_desc_view">浏览 <span>{{data[0].post.viewCount}}</span></p>
 				<a class="communityIndex_top_topic_desc_btn"  v-on:click="descMsg()">
 					<i class="iconfont icon-moreclass"></i>
 				</a>
@@ -25,7 +25,7 @@
 					<p>
 						<i class="iconfont icon-view"></i> 只看主楼
 					</p>
-					<p>
+					<p @click="orderBtn()">
 						<i class="iconfont icon-paixu"></i> 正序/倒序
 					</p>
 					<router-link tag="p" to="/tip">
@@ -38,36 +38,63 @@
 		<div class="communityIndex_top_content">
 			<ul>
 				<li class="communityIndex_top_content_list">
-					<p>FPS作为一个老生常谈的话题，自不用过多的赘</p>
+					<p>{{data[0].post.content}}</p>
+					<img :src="data[0].post.img" alt="" />
 					<p class="communityIndex_top_content_list_goods">
-						<span><em><i class="iconfont icon-good"></i></em><i>155</i></span>
-						<span><em><i class="iconfont icon-LC_icon_chat_fill_1"></i></em><i>16</i></span>				
+						<span><em><i class="iconfont icon-good" ref="listGood"></i></em><i>{{currentGoods}}</i></span>
+						<span><em><i class="iconfont icon-LC_icon_chat_fill_1"></i></em><i>{{currentNum}}</i></span>				
 					</p>
 				</li>
 			</ul>
-			<p class="communityIndex_top_content_more">加载更多>></p>
+			
 		</div>
+		<!--评论-->
+		  <div class="communityIndex_comment">
+		  	<ul v-if="data[0].post.chat" ref="commentList">
+		  		<li v-for="(item,index) in currentData">
+		  			<div class="communityIndex_comment_top">
+			  			<div class="communityIndex_comment_ico">
+			  				<img :src="item.ico" alt="" />
+			  			</div>
+			  			<div class="communityIndex_comment_msg">
+			  				<h3>{{item.username}}</h3>
+			  				<p>
+			  					<span >{{ index ==0?"沙发": ((index+1)+'楼')}}</span>{{item.time}}
+			  				</p>		  				
+			  			</div>
+			  			<div class="communityIndex_comment_reply" @click="showMask()">
+			  				<i class="iconfont icon-LC_icon_chat_fill_1"></i>
+			  			</div>
+		  			</div>
+		  			<div class="communityIndex_comment_content">
+		  				{{item.content}}
+		  			</div>
+		  		</li>
+		  	</ul>
+		  	<p class="communityIndex_top_content_more" @click="moreBtn()" ref="contentMore" >加载更多>></p>
+		  </div>
 		<!--communityIndex_top_reply-->
 		<div class="communityIndex_top_reply" >
-			<div class="communityIndex_top_reply_goods">
+			<div class="communityIndex_top_reply_goods" @click="replyGood($event)">
 				<i class="iconfont icon-good"></i>
 			</div>
 			<div class="communityIndex_top_reply_input" v-on:click="showMask()">
 				评论内容
 			</div>
-			<div class="communityIndex_top_reply_btn">
+			<div class="communityIndex_top_reply_btn" @click="showMask()">
 				回复
 			</div>
 		</div>
 		<!--弹出回复框-->
 		<div class="communityIndex_mask" v-show="maskflage">
 			<!--@backMaskflage接收子级发送的事件-->
-			<maskCommunity :maskflage="maskflage" @backMaskflage="backMaskflage"></maskCommunity>
+			<maskCommunity :maskflage="maskflage" @backMaskflage="backMaskflage" @backmsg="backmsg"></maskCommunity>
 		</div>
 	</div>
 </template>
 
 <script>
+	import commIndex from '../../../api/communityIndex'
 	import maskCommunity from "../mask/maskCommunity"
 	export default{
 		props:{
@@ -78,11 +105,56 @@
 				//开关小图标按钮
 				descMsgflage:false,
 				//弹出层的开关
-				maskflage:false
+				maskflage:false,
+				//存储后台返回的数据
+				data:[],
+				//存储当前加载的评论数据
+				currentData:[],
+				//存储当前的点赞
+				currentGoods:0,
+				//评论数量
+				currentNum:0,
+				//页数
+				page:1
 			}
 		},
 		components:{
 			maskCommunity
+		},
+		created(){
+			/*const ERRNO=0			
+			this.$http.get("/api/data").then((res)=>{
+				if(res.data.errno==ERRNO){					
+					this.data=res.data.data	
+					console.log(res.data.data)
+					this.currentData=this.data[0].post.chat[1]
+					this.currentGoods=this.data[0].post.goods
+					this.replyNum()
+					//console.log(this.data[0].post)
+				}				
+			})	*/
+			const _this=this		
+			const arr=[{}]
+			//调用commIndex函数请求数据
+			commIndex("/api/data",_this).then((data)=>{		
+				//处理数据转化成[{...}]形式
+				for(let i in data[0]){
+					arr[0][i]=data[0][i]
+					
+				}		
+				    //把数据赋值给变量
+				    
+					this.data=arr					
+					this.currentData=this.data[0].post.chat[1]
+					this.currentGoods=this.data[0].post.goods
+					this.replyNum()
+					console.log(this.data[0].post.chat[1])
+				})
+			
+			
+		},
+		computed:{
+			
 		},
 		methods:{
 			//开关小图标按钮
@@ -96,6 +168,53 @@
 			//子级发送的事件
 			backMaskflage(data){
 				this.maskflage=data
+			},
+			//几点加载更多按钮
+			moreBtn(){				
+				let arr=Object.keys(this.data[0].post.chat)
+				if(this.page==arr.length){
+					this.$refs.contentMore.innerHTML="已经到底了..."
+					return
+				}
+				//let len=this.data[0].post.chat[this.page].length*this.page
+				this.page++
+				/*for(let i=0;i<this.data[0].post.chat[this.page].length;i++){
+					this.currentData.splice(len,0,this.data[0].post.chat[this.page][i])
+					len++
+				}*/
+                this.currentData=this.currentData.concat(this.data[0].post.chat[this.page])			
+			  
+			},
+			//向数据中添加回复的内容
+			backmsg(data){
+				this.currentData.push({
+					 "ico":"http://ctimg.5fun.com/upload/images//headportraitv3/20180327/7e73f31b378f6d8b856b940f3e58fe8f_1522140589.jpg",
+			         "username":"mememememe",
+			         "time":"2017-11-14 19:26:43",
+			         "content":data
+				})
+				this.currentNum++
+			},
+			//点击赞
+			replyGood(event){
+				let target=event.currentTarget||event.target
+				if(target.firstElementChild.style.color!="rgb(255, 117, 15)"){				
+					target.firstElementChild.style.color="#ff750f"
+					this.$refs.listGood.style.color="#ff750f"
+					this.currentGoods++
+				}				
+			},
+			//评论数量
+			replyNum(){
+				let arr=Object.keys(this.data[0].post.chat)
+				let len=this.data[0].post.chat[1].length
+				this.currentNum=(arr.length-1)*(this.data[0].post.chat[1].length)+this.data[0].post.chat[arr.length-1].length
+			    
+			},
+			//点击排序
+			orderBtn(){
+				this.currentData.reverse()
+				this.descMsgflage=false
 			}
 		}
 	}
@@ -255,9 +374,12 @@
 	    min-height: 1.2rem;
 	    text-align: left;
 	}
+	.communityIndex_top_content_list>img{
+		padding:0 0.15rem;
+	}
 	.communityIndex_top_content_list_goods{
 		text-align: center;
-		padding-bottom: 0.1rem;
+		padding: 0.3rem 0 0.12rem;
 	}
 	.communityIndex_top_content_list_goods span{
 		 display: inline-block;
@@ -285,6 +407,78 @@
 		    padding: 0.20rem 0;
 		    color: #00a8ff;
 		    font-size: 0.12rem;
+	}
+	/*communityIndex_comment*/
+	.communityIndex_comment{
+		width: 100%;
+		padding-bottom: 0.49rem;
+	}
+	.communityIndex_comment ul{
+		width: 100%;
+		position: relative;
+	}
+	.communityIndex_comment ul li{
+		width: 100%;
+		padding:0.15rem;
+		position: relative;
+	}
+	.communityIndex_comment ul li::before{
+		content: "";
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width:100%;
+		border-bottom: 1px solid #c5c5c5;
+		transform: scaleY(0.5);
+	}
+	.communityIndex_comment ul li:last-child:before{
+		border: none;
+	}
+	.communityIndex_comment_top{
+		width: 100%;
+		overflow: hidden;
+	}
+	.communityIndex_comment_ico{
+		    margin-right: 0.12rem;
+		    position: relative;
+		    width: 0.4rem;
+		    height: 0.4rem;
+		    float: left;
+		    border-radius: 50%;
+		    overflow: hidden;
+	}
+	.communityIndex_comment_msg{
+		float: left;
+	}
+	.communityIndex_comment_msg>h3{
+		    font-weight: normal;
+		    font-size: 0.14rem;
+		    color: #202020;
+		    margin-bottom: 0.02rem;
+	}
+	.communityIndex_comment_msg>p{
+		        font-size: 0.12rem;
+    			color: #c5c5c5;
+	}
+	.communityIndex_comment_reply{
+		    display: block;
+		    float: right;
+		   
+		    margin-top: 0.06rem;
+		    overflow: hidden;
+		    background-position: -0.67rem -0.63rem;
+	}
+	.communityIndex_comment_reply>i{
+		 font-size: 0.22rem;
+		 color: #A5A5A5;
+	}
+	.communityIndex_comment_content{
+		    padding-left: 0.47rem;
+   			 width: 100%;
+   			 color: #555555;
+    		font-size: 0.14rem;
+    		line-height: 0.2rem;
+    		padding-top: 0.16rem;
 	}
 	/*communityIndex_top_reply*/
 	.communityIndex_top_reply{
