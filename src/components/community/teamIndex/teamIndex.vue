@@ -1,12 +1,12 @@
 <template>
 	<div class="teamIndex">
-		<teamHeader :name="name"></teamHeader>
+		<teamHeader :name="name" :goFlage="goFlage" @backLast="backLast"></teamHeader>
 		<!--data数据存在就渲染-->
 		<div class="teamIndex_content" v-if="data">
 			<router-link tag="div" to="/wzsjIndex" class="teamIndex_content_top">
-				<img :src="data.ico" alt="" class="teamIndex_content_top_ico" />
+				<img :src="currIco" alt="" class="teamIndex_content_top_ico" />
 				<div class="teamIndex_content_top_name">
-					<p v-if="data.name">{{ data.name}}</p>
+					<p v-if="currName">{{ currName}}</p>
 					<p v-if="data.desc">{{ data.desc}}</p>
 				</div>
 			</router-link>
@@ -65,8 +65,12 @@
 				contentData:[],
 				//存储获取数据的api,用于路由之间的通信
 				teamDataApi:'teamData',
-				contentDataApi:'teamContent'
+				contentDataApi:'teamContent',
+				goFlage:false
 			}
+		},
+		computed:{
+			...mapGetters(['currName','currIco'])
 		},
 		components:{
 			teamHeader,
@@ -80,31 +84,27 @@
 			getData("/api/teamData",_this).then((data)=>{
 				this.data=data[0]
 				//console.log(this.data.content[0].id)		
-				//把用户名和游戏名保存到vuex的state中
-				if(this.data){					
-					this.setcurrName(this.data.name)
-					this.setcurrIco(this.data.ico)
-				}
+				
 			})
 			//获取teamContent数据
 			getData("/api/teamContent",_this).then((data)=>{
 				this.contentData=data			
 				//console.log(this.contentData[0].content.contentName)
 			})
-			
-			
+			console.log(this.currIco+"::"+this.currName)
+			if(!this.currIco || !this.currName){
+				this.$router.go(-1)
+			}
 		},
-		methods:{
-			//把当前游戏名保存到vuex,把mutations中的CURRNAME方法赋值给setcurrName变量供外部调用
-			...mapMutations({
-				setcurrName:'CURRNAME',
-			    setcurrIco:'CURRICO'
-			}),
+		methods:{		
 			changeFlage(){
 				this.flage=!this.flage
 			},
 			showMenu(){
 				this.menuFlage=!this.menuFlage
+			},
+			backLast(val){
+				this.$emit("backLast",val)
 			}
 		}
 	}
@@ -117,9 +117,15 @@
 		position: absolute;
 		top: 0;
 		left: 0;
+		z-index: 200;
+		min-height: 100%;
+		background: #fff;
 	}
 	.teamIndex_content{
 		width:100%;
+		position: relative;
+		z-index: 200;
+		background: #fff;
 	}
 	/*teamIndex_content_top开始*/
 	.teamIndex_content_top{
@@ -154,6 +160,7 @@
     .teamIndex_content_list{
     	width: 100%;
     	position: relative;
+    	z-index: 200;
     }
     .teamIndex_content_list::before{
     	width: 100%;
@@ -162,6 +169,7 @@
     	position: absolute;
     	top: 0;
     	left: 0;
+    	z-index: 200;
     }
     .teamIndex_content_list li::before{
     	width: 100%;
@@ -170,6 +178,7 @@
     	bottom: 0;
     	left: 0;
     	content: "";
+    	z-index: 200;
     }
     .teamIndex_content_list li{
     	width: 100%;
@@ -179,6 +188,7 @@
 		padding: 0.15rem ;	
 		position: relative;	
 		text-align: left;
+		z-index: 200;
     }
     .teamIndex_content_list_tag em{
     	    display: inline-block;
@@ -221,6 +231,7 @@
     	left: 0;
     	width: 100%;
     	border-bottom: 0.04rem solid #C5C5C5;
+    	z-index: 200;
     }
    .teamIndex_main_head a{
    	  	display: block;
@@ -262,6 +273,7 @@
 	    background: #ffffff;
 	    font-size: 0.12rem;
 	    color: #202020;
+	    z-index: 200;
    }
    /*发布按钮*/
 	.teamIndex_main_issue{		    

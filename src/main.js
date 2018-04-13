@@ -4,6 +4,13 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import store from "./store"
+import resource from 'vue-resource'
+import MintUI from 'mint-ui'
+//import 'mint-ui/lib/style.css' //引入出错
+
+
+Vue.use(MintUI)
+Vue.use(resource)
 
 Vue.config.productionTip = false
 

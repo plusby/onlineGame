@@ -6,26 +6,19 @@ import sendPost from "../components/community/sendPost/sendPost"
 import tip from "../components/community/tip/tip"
 import successTip from "../components/community/tip/successTip"
 import wzsjIndex from '../components/wzsj/wzsjIndex/wzsjIndex'
-import resource from 'vue-resource'
-import VueLazyLoad from 'vue-lazyload'
-import Mint from 'mint-ui';
+
+
 
 
 Vue.use(Router)
-Vue.use(resource)
-Vue.use(VueLazyLoad,{
-	preLoad:1,
-	error:'../../../img/commonImg/loading.jpg',
-	loading:'../../../img/commonImg/loading.jpg'
-})
-Vue.use(Mint);
+
 
 export default new Router({
   routes: [
     {
-      path: '/',
+      path: '/teamIndex',
       name: 'teamIndex',
-      component: teamIndex
+      component:teamIndex
     },
     {
       path: '/communityIndex/:id',
@@ -48,7 +41,7 @@ export default new Router({
       component: successTip
     },
     {
-    	path:'/wzsjIndex',
+    	path:'/',
     	name:'wzsjIndex',
     	component:wzsjIndex
     }

@@ -12,12 +12,21 @@
 		props:{
 			name:{
 				type:String
+			},
+			goFlage:{
+				type:Boolean
 			}
 		},
 		methods:{
-			go(){
-				this.$router.go(-1)
-			}
+			
+				go(){
+					//if(this.goFlage){
+						this.$router.go(-1)
+					/*}else{
+						this.$emit("backLast",false)
+					}*/
+				}
+			
 		}
 	}
 </script>
