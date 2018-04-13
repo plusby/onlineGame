@@ -14,8 +14,10 @@ const portfinder = require('portfinder')
 var appData=require('../src/data/communityIndex.json')
 //获取下面的数据
 var data=appData.data
-
-
+//获取teamIndex中的数据
+var teamData=appData.teamData
+//获取teamIndex中的content数据
+var teamContent=appData.teamContent
 
 
 const HOST = process.env.HOST
@@ -58,6 +60,20 @@ const devWebpackConfig = merge(baseWebpackConfig, {
 		      // 这里是你的json内容
 		      errno: 0,
 		      data: data
+		    })
+		  }),
+		  app.get('/api/teamData', (req, res) => {
+		    res.json({
+		      // 这里是你的json内容
+		      errno: 0,
+		      data:teamData
+		    })
+		  }),
+		  app.get('/api/teamContent', (req, res) => {
+		    res.json({
+		      // 这里是你的json内容
+		      errno: 0,
+		      data:teamContent
 		    })
 		  })
 		}

@@ -1,0 +1,5 @@
+1.
+	<!--v-if判断数据是否存在和其他命令使用此数据不能放在同一个元素中，否则会出错-->
+	<span v-if="contentData[index]&&item.contentName==contentData[index].content.contentName" class="teamIndex_content_list_tag">
+			<em  v-for="(val,i) in contentData[index].content.tag" >{{ val  }}</em>	
+	</span>

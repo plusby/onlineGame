@@ -1,89 +1,43 @@
 <template>
-	<div class="teamIndex_post">
-		<ul>
-			<li>
-				<router-link to="/communityIndex">
+	<div class="teamIndex_post" >
+		<div class="loader" v-if="currentData.length==0">Loading...</div>
+		<ul v-if="currentData">
+			<li v-for="(item,index) in currentData.main">
+				<!--路由传参-->
+				<router-link :to="{ name:'communityIndex',params:{id:item.id,api:teamDataApi } }">
 				<h4 class="teamIndex_post_head">
-					本次领取的五个游戏均是端游，其中一个是Steam平台上的本次领取的五个游戏均是端游，
-					其中一个是Steam平台上的本次领取的五个游戏均是端游，其中一个是Steam平台上的本
-					次领取的五个游戏均是端游，其中一个是Steam平台上的
+					{{item.content.contentName}}
 				</h4>
 				<p class="teamIndex_post_content">
-					本次领取的五个游戏均是端游，其中一个是Steam平台上的本次领取的五个游戏均是端游，
-					其中一个是Steam平台上的本次领取的五个游戏均是端游，其中一个是Steam平台上的本
-					次领取的五个游戏均是端游，其中一个是Steam平台上的本次领取的五个游戏均是端游，
-					其中一个是Steam平台上的
+					{{item.content.content}}
 				</p>
-				<div class="teamIndex_post_cream">
-					<img src="../../../img/teamIndexImg/img_01.jpg" alt="">
-					<img src="../../../img/teamIndexImg/img_02.jpg" alt="">
-					<img src="../../../img/teamIndexImg/img_03.jpg" alt="">
+				<div class="teamIndex_post_cream" v-if="item.content.img">
+					<img v-for="(val,i) in item.content.img" :src="val" alt="">					
 				</div>
 				<div class="teamIndex_post_comment">
 					<div class="teamIndex_post_comment_left">
-						<span>喔喔</span>
-						<span>时间</span>
+						<span>{{ item.username }}</span>
+						<span>{{ item.time }}</span>
 					</div>
 					<div class="teamIndex_post_comment_right">
 						<span>
 							<i class="iconfont icon-view"></i>
-							<em>1234</em>
+							<em>{{item.content.viewCount}}</em>
 						</span>
 						<span>
 							<i class="iconfont icon-good"></i>
-							<em>1234</em>
+							<em>{{item.content.goods}}</em>
 						</span>
 						<span>
 							<i class="iconfont icon-LC_icon_chat_fill_1"></i>
-							<em>1254</em>
+							<em>{{item.content.reply}}</em>
 						</span>
 					</div>
 				</div>
 				</router-link>
-			</li>
-			<li>
-				<router-link to="/communityIndex">
-				<h4 class="teamIndex_post_head">
-					本次领取的五个游戏均是端游，其中一个是Steam平台上的本次领取的五个游戏均是端游，
-					其中一个是Steam平台上的本次领取的五个游戏均是端游，其中一个是Steam平台上的本
-					次领取的五个游戏均是端游，其中一个是Steam平台上的
-				</h4>
-				<p class="teamIndex_post_content">
-					本次领取的五个游戏均是端游，其中一个是Steam平台上的本次领取的五个游戏均是端游，
-					其中一个是Steam平台上的本次领取的五个游戏均是端游，其中一个是Steam平台上的本
-					次领取的五个游戏均是端游，其中一个是Steam平台上的本次领取的五个游戏均是端游，
-					其中一个是Steam平台上的
-				</p>
-				<div class="teamIndex_post_cream">
-					<img src="../../../img/teamIndexImg/img_01.jpg" alt="">
-					<img src="../../../img/teamIndexImg/img_02.jpg" alt="">
-					<img src="../../../img/teamIndexImg/img_03.jpg" alt="">
-				</div>
-				<div class="teamIndex_post_comment">
-					<div class="teamIndex_post_comment_left">
-						<span>喔喔</span>
-						<span>时间</span>
-					</div>
-					<div class="teamIndex_post_comment_right">
-						<span>
-							<i class="iconfont icon-view"></i>
-							<em>1234</em>
-						</span>
-						<span>
-							<i class="iconfont icon-good"></i>
-							<em>1234</em>
-						</span>
-						<span>
-							<i class="iconfont icon-LC_icon_chat_fill_1"></i>
-							<em>1254</em>
-						</span>
-					</div>
-				</div>
-				</router-link>
-			</li>
-			
+			</li>		
 		</ul>
-		<div class="teamIndex_post_more">
+		<div class="teamIndex_post_more" @click="postMore($event)" >
 			加载更多>>
 		</div>
 		
@@ -92,7 +46,38 @@
 
 <script>
 	export default{
-		
+		props:["postData","teamDataApi"],
+		data(){
+			return{
+				data:[],
+				//当前数据
+				currentData:[],
+				//加载更多
+				page:0
+			}
+		},
+		computed:{
+			
+		},
+		mounted(){
+			setTimeout(()=>{			
+				this.data=this.postData.viewPost				
+				this.currentData=this.data[this.page]		
+				
+			},500)					
+		},
+		methods:{
+			//点击加载更多
+			postMore(event){
+				if(this.data&&this.page<this.data.length-1){
+					this.page++
+					this.currentData.main=this.currentData.main.concat(this.data[this.page].main)					
+				}else{
+					let ev=event.currentTarget||event.target
+					ev.innerHTML="已经到底了"
+				}
+			}
+		}
 	}
 </script>
 
@@ -173,4 +158,52 @@
 	    color: #00a8ff;
 	    font-size: 0.12rem;
 	}
+	/*纯白色圈*/
+.loader {
+   text-indent: -9999em;
+   position: relative;
+   width:1rem;
+   height: 1rem;
+   box-shadow: inset 0 0 0 15px #C5C5C5;
+   border-radius: 50%;
+   margin: 0.4rem auto;
+}
+.loader::before {
+   position: absolute;
+   content: '';
+   width: 0.5rem;
+   height: 1rem;
+   background: #ffff;
+
+   /*半圆*/
+   border-radius: 0 1rem 1rem 0;
+   left: 0.5rem;
+
+   /*原点从（0,0）移至圆心处（0,100），绕圆心旋转*/
+   transform-origin: 0px 0.5rem;
+   animation: load-effect 2s infinite linear;
+}
+
+/*最上层（即::before之前）绘制透明白色圆环*/
+.loader::after {
+   position: absolute;
+   content: '';
+   width: 1rem;
+   height: 1rem;
+   border-radius: 50%;
+   left: 0;
+   box-shadow: inset 0 0 0 0.1rem rgba(255,255,255,1);
+}
+
+/*动画：旋转360°*/
+@keyframes load-effect {
+   0% {
+      -webkit-transform: rotate(0deg);
+      transform: rotate(0deg);
+   }
+   100% {
+      -webkit-transform: rotate(360deg);
+      transform: rotate(360deg);
+   }
+}
 </style>

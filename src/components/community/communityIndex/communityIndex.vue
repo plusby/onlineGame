@@ -1,23 +1,23 @@
 <template>
-	<div class="communityIndex" v-if="data[0]">
+	<div class="communityIndex" v-if="data[pos.mainIndex]">
 		<div class="communityIndex_top">
 			<div class="communityIndex_top_ico">
 				<img src="../../../img/teamIndexImg/comments_topic.jpg" alt="" />
 			</div>
 			<div class="communityIndex_top_msg">
-				<h4>{{data[0].username}} <span>主楼</span></h4>
-				<p>{{data[0].time}}</p>
+				<h4>{{data[pos.mainIndex].username}} <span>主楼</span></h4>
+				<p>{{data[pos.mainIndex].time}}</p>
 			</div>
 			<div class="communityIndex_top_logo">
-				<img src="../../../img/teamIndexImg/game_icon.png" alt="" />
-				<span>未知世界</span>
+				<img :src="currIco" alt="" />
+				<span>{{currName}}</span>
 			</div>
 		</div>
 		<!--communityIndex_top_topic-->
 		<div class="communityIndex_top_topic">
-			<h3><em>精华</em><span>{{data[0].post.postName}}</span></h3>
+			<h3><em>精华</em><span>{{data[pos.mainIndex].content.contentName}}</span></h3>
 			<div class="communityIndex_top_topic_desc clearfloat">
-				<p class="communityIndex_top_topic_desc_view">浏览 <span>{{data[0].post.viewCount}}</span></p>
+				<p class="communityIndex_top_topic_desc_view">浏览 <span>{{data[pos.mainIndex].content.viewCount}}</span></p>
 				<a class="communityIndex_top_topic_desc_btn"  v-on:click="descMsg()">
 					<i class="iconfont icon-moreclass"></i>
 				</a>
@@ -38,8 +38,8 @@
 		<div class="communityIndex_top_content">
 			<ul>
 				<li class="communityIndex_top_content_list">
-					<p>{{data[0].post.content}}</p>
-					<img :src="data[0].post.img" alt="" />
+					<p>{{data[pos.mainIndex].content.content}}</p>
+					<img :src="data[pos.mainIndex].content.img[0]" alt="" />
 					<p class="communityIndex_top_content_list_goods">
 						<span><em><i class="iconfont icon-good" ref="listGood"></i></em><i>{{currentGoods}}</i></span>
 						<span><em><i class="iconfont icon-LC_icon_chat_fill_1"></i></em><i>{{currentNum}}</i></span>				
@@ -50,11 +50,11 @@
 		</div>
 		<!--评论-->
 		  <div class="communityIndex_comment">
-		  	<ul v-if="data[0].post.chat" ref="commentList">
+		  	<ul v-if="data[pos.mainIndex].content.chat" ref="commentList">
 		  		<li v-for="(item,index) in currentData">
 		  			<div class="communityIndex_comment_top">
 			  			<div class="communityIndex_comment_ico">
-			  				<img :src="item.ico" alt="" />
+			  				<img v-lazy="item.ico" alt="" />
 			  			</div>
 			  			<div class="communityIndex_comment_msg">
 			  				<h3>{{item.username}}</h3>
@@ -94,7 +94,8 @@
 </template>
 
 <script>
-	import commIndex from '../../../api/communityIndex'
+	import { mapState,mapGetters,mapMutations} from 'vuex';
+	import getData from '../../../api/getData'
 	import maskCommunity from "../mask/maskCommunity"
 	export default{
 		props:{
@@ -115,11 +116,18 @@
 				//评论数量
 				currentNum:0,
 				//页数
-				page:1
+				page:1,
+				//根据上页点击数据找到它所在的位置
+				pos:{
+					viewPostIndex:0,
+					mainIndex:0
+				}
 			}
 		},
 		components:{
 			maskCommunity
+		},
+		watch: {
 		},
 		created(){
 			/*const ERRNO=0			
@@ -133,33 +141,72 @@
 					//console.log(this.data[0].post)
 				}				
 			})	*/
+			//上页点击数据时所在的api地址，在此获取
+			const _url=this.$route.params.api
+			//console.log("aaaaa"+_url)
+			//获取上页点击的数据的id
+			const id=this.$route.params.id
+			//如果不存在api就返回上一页
+			if(!_url){
+				this.$router.go(-1)
+				return
+			}			
 			const _this=this		
-			const arr=[{}]
-			//调用commIndex函数请求数据
-			commIndex("/api/data",_this).then((data)=>{		
-				//处理数据转化成[{...}]形式
-				for(let i in data[0]){
-					arr[0][i]=data[0][i]
+			//调用getData函数请求数据
+			getData(`/api/${_url}`,_this).then((data)=>{	
+								
+				    //处理api为teamData的数据
+				    if(_url==="teamData"){
+					    //找到点击数据的位置
+					    for(var c=0;c<data[0].viewPost.length;c++){
+					    	for(var a in data[0].viewPost[c]){				    		
+					    		for(var i=0;i<data[0].viewPost[c].main.length;i++){
+							    	 let z=i						    	
+							    	for(var j in data[0].viewPost[c].main[i]){
+							    		console.log(data[0].viewPost[c].main[i].id)
+							    		if(data[0].viewPost[c].main[i].id==id){
+							    			this.pos.viewPostIndex=c
+							    			this.pos.mainIndex=z				    			
+							    		}
+							    	}
+							    }
+					    	}					    
+					    }
+					    //数据赋值给当前变量
+						this.data=data[0].viewPost[this.pos.viewPostIndex].main					
+						this.currentData=this.data[this.pos.viewPostIndex].content.chat[1]
+						this.currentGoods=this.data[this.pos.viewPostIndex].content.goods
+						this.replyNum()
+						console.log(this.data)
+					}else{ //处理api为teamContent的数据
+						console.log(data)
+						for(var i=0;i<data.length;i++){
+							let z=i						    	
+							for(var j in data[i]){
+							    	console.log(data[i].id)
+							    	if(data[i].id==id){
+							    			this.pos.viewPostIndex=z
+							    			this.pos.mainIndex=z				    			
+							    	}
+							}
+						}
+						this.data=data					
+						this.currentData=this.data[this.pos.viewPostIndex].content.chat[1]
+						this.currentGoods=this.data[this.pos.viewPostIndex].content.goods
+						this.replyNum()
+					}
 					
-				}		
-				    //把数据赋值给变量
-				    
-					this.data=arr					
-					this.currentData=this.data[0].post.chat[1]
-					this.currentGoods=this.data[0].post.goods
-					this.replyNum()
-					console.log(this.data[0].post.chat[1])
 				})
-			
 			
 		},
 		computed:{
-			
+			//获取到vuex中的state中的属性
+			...mapGetters(['currName','currIco'])
 		},
 		methods:{
 			//开关小图标按钮
 			descMsg(){
-				this.descMsgflage=!this.descMsgflage
+				this.descMsgflage=!this.descMsgflage				
 			},
 			//显示弹出层
 			showMask(){
@@ -171,7 +218,7 @@
 			},
 			//几点加载更多按钮
 			moreBtn(){				
-				let arr=Object.keys(this.data[0].post.chat)
+				let arr=Object.keys(this.data[0].content.chat)
 				if(this.page==arr.length){
 					this.$refs.contentMore.innerHTML="已经到底了..."
 					return
@@ -182,7 +229,7 @@
 					this.currentData.splice(len,0,this.data[0].post.chat[this.page][i])
 					len++
 				}*/
-                this.currentData=this.currentData.concat(this.data[0].post.chat[this.page])			
+                this.currentData=this.currentData.concat(this.data[0].content.chat[this.page])			
 			  
 			},
 			//向数据中添加回复的内容
@@ -206,9 +253,9 @@
 			},
 			//评论数量
 			replyNum(){
-				let arr=Object.keys(this.data[0].post.chat)
-				let len=this.data[0].post.chat[1].length
-				this.currentNum=(arr.length-1)*(this.data[0].post.chat[1].length)+this.data[0].post.chat[arr.length-1].length
+				let arr=Object.keys(this.data[0].content.chat)
+				let len=this.data[0].content.chat[1].length
+				this.currentNum=(arr.length-1)*(this.data[0].content.chat[1].length)+this.data[0].content.chat[arr.length-1].length
 			    
 			},
 			//点击排序

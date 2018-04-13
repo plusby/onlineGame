@@ -1,28 +1,26 @@
 <template>
 	<div class="teamIndex">
 		<teamHeader :name="name"></teamHeader>
-		<div class="teamIndex_content">
+		<!--data数据存在就渲染-->
+		<div class="teamIndex_content" v-if="data">
 			<router-link tag="div" to="/wzsjIndex" class="teamIndex_content_top">
-				<img src="../../../img/teamIndexImg/game_icon.png" alt="" class="teamIndex_content_top_ico" />
+				<img :src="data.ico" alt="" class="teamIndex_content_top_ico" />
 				<div class="teamIndex_content_top_name">
-					<p>未知世界</p>
-					<p>悟饭官方网游活动、福利发放、攻略分享及交流区攻略分享及交流区</p>
+					<p v-if="data.name">{{ data.name}}</p>
+					<p v-if="data.desc">{{ data.desc}}</p>
 				</div>
 			</router-link>
 			<ul class="teamIndex_content_list">
-				<li>
-					<em>精</em>
-					<em>顶</em>
-					<span>《绝地求生》还能拿来拍电影？新上线的回放功能被新上线的回放...</span>
-				</li>
-				<li>
-					<em>顶</em>
-					<span>精致的换装后，“暖暖”邂逅了她记忆中的恋爱原味</span>
-				</li>
-				<li>
-					<em>顶</em>
-					<span>开发者访谈：对话《暴走英雄坛》开发者</span>
-				</li>
+				
+				<li v-for="(item,index) in data.content" >
+					<router-link :to="{ name:'communityIndex', params:{id:item.id,api:contentDataApi } }">
+					<!--v-if判断数据是否存在和其他命令使用此数据不能放在同一个元素中，否则会出错-->
+					<span v-if="contentData[index]&&item.contentName==contentData[index].content.contentName" class="teamIndex_content_list_tag">
+						<em  v-for="(val,i) in contentData[index].content.tag" >{{ val  }}</em>	
+					</span>
+					<span>{{item.contentName}}</span>
+					</router-link>
+				</li>			
 			</ul>
 			<div class="teamIndex_main">
 				<div class="teamIndex_main_head">
@@ -37,7 +35,7 @@
 						
 				</div>	
 				<div class="teamIndex_main_wrapper">
-					<teamIndexPost v-show="flage"></teamIndexPost>
+					<teamIndexPost v-show="flage" :postData="data" :teamDataApi="teamDataApi"></teamIndexPost>
 					<teamIndexTopic v-show="!flage"></teamIndexTopic>
 					<router-link to="/sendPost"  class="teamIndex_main_issue">
 						<i class="iconfont icon-moreh"></i>
@@ -49,6 +47,8 @@
 </template>
 
 <script>
+	import { mapState,mapGetters,mapMutations} from 'vuex';
+	import getData from '../../../api/getData'
 	import teamHeader from '../header/header'
 	import teamIndexPost from './teamIndex-post'
 	import teamIndexTopic from './teamIndex-topic'
@@ -58,7 +58,14 @@
 			return {
 				name:"群组名称",
 				flage:true,
-				menuFlage:false
+				menuFlage:false,
+				//存储获取teamData数据
+				data:[],
+				//存储获取teamContent数据
+				contentData:[],
+				//存储获取数据的api,用于路由之间的通信
+				teamDataApi:'teamData',
+				contentDataApi:'teamContent'
 			}
 		},
 		components:{
@@ -67,7 +74,32 @@
 			teamIndexTopic,
 			teamIndexMenu
 		},
+		created(){
+			const _this=this
+			//获取teamData数据
+			getData("/api/teamData",_this).then((data)=>{
+				this.data=data[0]
+				//console.log(this.data.content[0].id)		
+				//把用户名和游戏名保存到vuex的state中
+				if(this.data){					
+					this.setcurrName(this.data.name)
+					this.setcurrIco(this.data.ico)
+				}
+			})
+			//获取teamContent数据
+			getData("/api/teamContent",_this).then((data)=>{
+				this.contentData=data			
+				//console.log(this.contentData[0].content.contentName)
+			})
+			
+			
+		},
 		methods:{
+			//把当前游戏名保存到vuex,把mutations中的CURRNAME方法赋值给setcurrName变量供外部调用
+			...mapMutations({
+				setcurrName:'CURRNAME',
+			    setcurrIco:'CURRICO'
+			}),
 			changeFlage(){
 				this.flage=!this.flage
 			},
@@ -148,7 +180,7 @@
 		position: relative;	
 		text-align: left;
     }
-    .teamIndex_content_list li em{
+    .teamIndex_content_list_tag em{
     	    display: inline-block;
 		    width: 0.15rem;
 		    text-align: center;
@@ -159,7 +191,10 @@
 		    background: #ff7d18;
 		    font-style: normal;
     }
-    .teamIndex_content_list li:nth-of-type(1) em:nth-of-type(1){
+    .teamIndex_content_list_tag em:nth-of-type(1){
+    	background: #ff7d18;
+    }
+    .teamIndex_content_list_tag em:nth-of-type(2){
     	background: #1fd8c0;
     }
     .teamIndex_content_list li span{

@@ -1,6 +1,6 @@
 const ERRNO=0
 
-const commIndex=(url,obj)=>{
+const getData=(url,obj)=>{
 	return obj.$http.get(url).then((res)=>{	
 	      res=res.body			
 		 if(res.errno==ERRNO){				 
@@ -11,4 +11,4 @@ const commIndex=(url,obj)=>{
 }
 
 
-export default commIndex
+export default getData
