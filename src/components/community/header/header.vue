@@ -12,19 +12,14 @@
 		props:{
 			name:{
 				type:String
-			},
-			goFlage:{
-				type:Boolean
 			}
 		},
 		methods:{
 			
 				go(){
-					//if(this.goFlage){
 						this.$router.go(-1)
-					/*}else{
 						this.$emit("backLast",false)
-					}*/
+					
 				}
 			
 		}
@@ -42,6 +37,7 @@
 	    position: relative;
 	    top: 0;
 	    left: 0;
+	    
 	    background: #202020;
 	}
 	.teamIndex-header-back{

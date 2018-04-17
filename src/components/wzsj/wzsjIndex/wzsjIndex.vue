@@ -1,19 +1,20 @@
 <template>
 	<div class="wzsjIndex" ref="wzsjIndex">
 		
+		<div class="wzsjIndex_wrap" id="wzsjIndex_wrap" ref="wzsjIndexWrap">
 		<!--wzsjIndex_banner-->
 		<div class="wzsjIndex_banner">			
-			<div class="wzsjIndex_head">
-				
-					<router-link to="/teamIndex" tag="div" class="wzsjIndex_head_ico">						
+			<div class="wzsjIndex_head">				
+					<router-link to="/wzsjIndex/teamIndex" tag="div" class="wzsjIndex_head_ico">						
 						  <img :src="wzsjData.ico" alt="" />						
-					</router-link>	
-					
+					</router-link>						
 				<div class="wzsjIndex_head_content">
 					<h3>{{ wzsjData.name }}</h3>
 					<p>年度最美清新梦幻风手游</p>
 				</div>
-				<a href="#" class="wzsjIndex_head_btn" @click="orderBtn()">立即预约</a>
+				<a href="javascript:;" class="wzsjIndex_head_btn" @click="headBtn()">
+					<img :src="loginIco" alt="" />
+				</a>
 			</div>
 			
 			
@@ -31,7 +32,7 @@
 				已有<span>999</span>人预约
 			</div>
 			<div class="wzsjIndex_banner_btn" @click="telOrder()"></div>
-			<div class="wzsjIndex_banner_explain" @click="instruction()">预约流程福利说明</div>
+			<div class="wzsjIndex_banner_explain" @click="instruction($event)">预约流程福利说明</div>
 		</div>
 		<!--wzsjIndex_item-->
 		<div class="wzsjIndex_item">
@@ -121,15 +122,16 @@
 			<slideBottom v-show="slideFlage" :showData="showData" @closeSlide="closeSlide"></slideBottom>
 		</transition>
 		<!--遮罩层弹窗-->
-		<div class="maskScreen" v-if="showMask" @click="hidenSlide()"></div>
+		<div class="maskScreen" v-if="showMask" @click="hidenSlide()" @touchmove.prevent @scroll.prevent></div>
 		<!--说一句弹窗-->
 		<maskCommunity :maskflage="maskflage" @backMaskflage="backMaskflage" @backmsg="backmsg" v-show="maskflage"></maskCommunity>
 	    <!--立即预约弹窗-->
 	    <phoneMsg  v-if="telFlage.flage" :telFlage="telFlage" @backTelFlage="backTelFlage"></phoneMsg>
-	    <!--立即预约教程弹窗-->
+	     <!--立即预约教程弹窗-->
 	    <orderInstruction v-if="instrFlage" @closeInstrc="closeInstrc"></orderInstruction>
+	   </div> 
 	    <transition name="slide_left">
-	    	
+	    	<router-view/>  
 	    </transition>
 	</div>
 </template>
@@ -141,6 +143,7 @@
 	import maskCommunity from "../../community/mask/maskCommunity"
 	import phoneMsg from "../phoneMsg/phoneMsg"
 	import orderInstruction from '../instruction/instruction'
+	import getRoutePath from '../../../common/js/getRoutePath'
 
 	export default{
 		data(){
@@ -166,8 +169,26 @@
 					name:"生化危城",
 					ico:"http://frimg.papa21.com/forum/20171114/1510649202-8904.png"
 				},
-				
+				loginIco:"https://m.360buyimg.com/mobilecms/jfs/t5824/248/156712927/7215/1ad6be5f/591d94c6Nc4711ad2.png",
+				setHeight:"",
+				setOverflow:""
 			}
+		},
+		watch:{
+			$route () {//判断路由跳转，以便显示和隐藏当前路由，从而实现跳转到子路由隐藏父级，从而实现在子级不会受到父级高度的影响
+				const _this=this
+				getRoutePath(_this,'/wzsjIndex/teamIndex','/wzsjIndex','wzsjIndexWrap')
+				getRoutePath(_this,'/wzsjIndex/login','/wzsjIndex','wzsjIndexWrap')
+				getRoutePath(_this,'/wzsjIndex/person','/wzsjIndex','wzsjIndexWrap')
+				
+				if(this.$store.getters.currUser){
+						
+						this.loginIco=this.$store.getters.currUserIco
+				}else{
+						this.loginIco="https://m.360buyimg.com/mobilecms/jfs/t5824/248/156712927/7215/1ad6be5f/591d94c6Nc4711ad2.png"
+				}
+			}
+			
 		},
 		components:{
 			cartoon,
@@ -183,7 +204,12 @@
 			if(this.wzsjData){					
 					this.setCurrentName(this.wzsjData.name)
 					this.setcurrIco(this.wzsjData.ico)
-				}
+			}
+			
+			if(!this.$store.getters.currUser){
+				this.loginIco="https://m.360buyimg.com/mobilecms/jfs/t5824/248/156712927/7215/1ad6be5f/591d94c6Nc4711ad2.png"
+			}
+			window.scrollTo(0, 0)
 		},
 		methods:{
 			//把当前游戏名保存到vuex,把mutations中的CURRNAME方法赋值给setcurrName变量供外部调用
@@ -213,7 +239,10 @@
 				this.slideFlage=true
 				this.showMask=true
 				this.showData=val
+				
 			},
+			
+			scrollWzsj(){},
 			//隐藏上滑窗口
 			closeSlide(val){
 				this.slideFlage=val
@@ -247,14 +276,26 @@
 				this.showMask=false
 			},
 			//说明教程
-			instruction(){
+			instruction(ev){
 				this.showMask=true
 				this.instrFlage=true
+				document.querySelector("body").style.overflow="hidden"
 			},
+			
 			//关闭说明教程
 			closeInstrc(val){
 				this.instrFlage=val
 				this.showMask=false
+				document.querySelector("body").style.overflow="auto"
+			},
+			headBtn(){
+				
+				if(this.$store.getters.currUser){ //如果用户登录就跳转到个人中心
+					this.$router.push("/wzsjIndex/person")
+				}else{ //否则就是登陆界面
+					this.$router.push("/wzsjIndex/login")
+				}
+				
 			}
 			
 		}
@@ -279,6 +320,13 @@
 		left: 0;
 		z-index: 100;
 	}
+	/*.wzsjIndex_wrap{
+		width: 100%;
+		position: absolute;
+		top: 0;
+		left: 0;
+		background: #fff;
+	}*/
 	/*wzsjIndex_head*/
 	.wzsjIndex_head{
 		width: 100%;
@@ -316,13 +364,18 @@
     		line-height: 0.15rem;
 	}
 	.wzsjIndex_head_btn{
-		width: 0.75rem;
         float: right;
-        line-height: 0.32rem;
-        color: #fff;
-        background: #F47500;
-        text-align: center;
-        margin-top: 0.06rem;
+	    width: 0.4rem;
+	    height: 0.4rem;
+	    background: #ffffff;
+	    border-radius: 0.4rem;
+	    overflow: hidden;	    
+	}
+	.wzsjIndex_head_btn>img{
+		width: 0.38rem;
+		height: 0.38rem;
+		margin: 0.01rem auto;
+		border-radius: 0.19rem;
 	}
 	/*wzsjIndex_banner*/
 	.wzsjIndex_banner{
@@ -562,6 +615,7 @@
     .maskScreen{
     	width: 100%;
     	min-height: 100%;
+    	overflow: auto;
     	position: fixed;
     	top: 0;
     	left: 0;
@@ -571,10 +625,10 @@
     .slide_left-enter-active,.slide_left-leave-active{
     	transition: all 0.5s; 
     }
-    .slide_left-enter,.slide_left-leave{
+    .slide_left-enter{
     	transform: translate3d(100%,0,0);
     }
-    .slide_left-leave{
-    	transform: translate3d(-100%,0,0);
+    .slide_left-leave,.slide_left-leave-active{
+    	transform: translate3d(100%,0,0);
     }
 </style>

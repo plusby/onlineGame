@@ -1,5 +1,5 @@
 <template>
-	<div class="slideBottom">
+	<div class="slideBottom" @touchmove.prevent>
 		<div class="slideBottom_wrap" v-if="showData=='qq'">
 				<p class="slideBottom_head">关注后即可领取专属福利</p>
 				<ul class="slideBottom_list">
@@ -57,7 +57,7 @@
 		    background: #fff;
 		    max-width: 500px;
 		    padding-bottom: 0.24rem;
-		    position: absolute;
+		    position: fixed;
 		    bottom: 0;
 		    z-index: 110;
 	}

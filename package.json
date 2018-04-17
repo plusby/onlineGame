@@ -14,11 +14,14 @@
   },
   "dependencies": {
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "jquery": "^3.3.1",
+    "lrz": "^4.9.40",
     "mint-ui": "^2.2.13",
     "vue": "^2.5.2",
     "vue-lazyload": "^1.2.2",
     "vue-resource": "^1.5.0",
     "vue-router": "^3.0.1",
+    "vue-scroll-lock": "^0.0.3",
     "vuex": "^3.0.1"
   },
   "devDependencies": {

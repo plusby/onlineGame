@@ -1,6 +1,7 @@
 <template>
 	<div class="teamIndex">
-		<teamHeader :name="name" :goFlage="goFlage" @backLast="backLast"></teamHeader>
+		<div class="teamIndex_wrap" ref="teamIndexWrap">
+		<teamHeader :name="name"  @backLast="backLast"></teamHeader>
 		<!--data数据存在就渲染-->
 		<div class="teamIndex_content" v-if="data">
 			<router-link tag="div" to="/wzsjIndex" class="teamIndex_content_top">
@@ -13,7 +14,7 @@
 			<ul class="teamIndex_content_list">
 				
 				<li v-for="(item,index) in data.content" >
-					<router-link :to="{ name:'communityIndex', params:{id:item.id,api:contentDataApi } }">
+					<router-link :to="{ name:'/wzsjIndex/teamIndex/communityIndex', params:{id:item.id,api:contentDataApi } }">
 					<!--v-if判断数据是否存在和其他命令使用此数据不能放在同一个元素中，否则会出错-->
 					<span v-if="contentData[index]&&item.contentName==contentData[index].content.contentName" class="teamIndex_content_list_tag">
 						<em  v-for="(val,i) in contentData[index].content.tag" >{{ val  }}</em>	
@@ -37,12 +38,17 @@
 				<div class="teamIndex_main_wrapper">
 					<teamIndexPost v-show="flage" :postData="data" :teamDataApi="teamDataApi"></teamIndexPost>
 					<teamIndexTopic v-show="!flage"></teamIndexTopic>
-					<router-link to="/sendPost"  class="teamIndex_main_issue">
+					<router-link to="/wzsjIndex/teamIndex/sendPost"  class="teamIndex_main_issue">
 						<i class="iconfont icon-moreh"></i>
 					</router-link>
 				</div>
 			</div>
 		</div>
+		</div>
+		<transition name="slide_left">
+	    	<router-view/>  
+	    </transition>
+	    <router-view name="community"></router-view>
 	</div>
 </template>
 
@@ -53,6 +59,7 @@
 	import teamIndexPost from './teamIndex-post'
 	import teamIndexTopic from './teamIndex-topic'
 	import teamIndexMenu from './teamIndex-menu'
+	import getRoutePath from '../../../common/js/getRoutePath'
 	export default{
 		data(){
 			return {
@@ -66,7 +73,7 @@
 				//存储获取数据的api,用于路由之间的通信
 				teamDataApi:'teamData',
 				contentDataApi:'teamContent',
-				goFlage:false
+				
 			}
 		},
 		computed:{
@@ -77,6 +84,14 @@
 			teamIndexPost,
 			teamIndexTopic,
 			teamIndexMenu
+		},
+		watch:{
+			$route(){//判断路由跳转，以便显示和隐藏当前路由，从而实现跳转到子路由隐藏父级，从而实现在子级不会受到父级高度的影响				
+				const _this=this
+				getRoutePath(_this,'/wzsjIndex/teamIndex/sendPost','/wzsjIndex/teamIndex','teamIndexWrap')
+				getRoutePath(_this,'/wzsjIndex/teamIndex','/wzsjIndex','wzsjIndexWrap')
+				
+			}
 		},
 		created(){
 			const _this=this
@@ -95,6 +110,7 @@
 			if(!this.currIco || !this.currName){
 				this.$router.go(-1)
 			}
+			
 		},
 		methods:{		
 			changeFlage(){
@@ -104,7 +120,7 @@
 				this.menuFlage=!this.menuFlage
 			},
 			backLast(val){
-				this.$emit("backLast",val)
+				
 			}
 		}
 	}
@@ -116,6 +132,16 @@
 		width: 100%;
 		position: absolute;
 		top: 0;
+		left: 0;
+		z-index: 200;
+		min-height: 100%;
+		background: #fff;
+		
+	}
+	.teamIndex_wrap{
+		width: 100%;
+		position: absolute;
+		top:0 ;
 		left: 0;
 		z-index: 200;
 		min-height: 100%;
@@ -215,6 +241,7 @@
     /*teamIndex_main开始*/
    .teamIndex_main{
    	width: 100%;
+   	background: #fff;
    
    }
    .teamIndex_main_head{
@@ -285,5 +312,14 @@
 	.teamIndex_main_issue .icon-moreh{
 		font-size: 0.55rem !important;
 		color: #FF6C06;
+	}
+	.slide_left-enter-active,.slide_left-leave-active{
+		transition: all 0.5s;
+	}
+	.slide_left-enter{
+		transform: translate3d(100%,0,0);
+	}
+	.slide_left-leave,.slide_left-leave-active{
+		transform: translate3d(100%,0,0);
 	}
 </style>

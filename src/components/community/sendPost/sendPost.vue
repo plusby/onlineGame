@@ -54,12 +54,16 @@
 <style scoped="scoped">
 	.sendPost{
 		width: 100%;
-		position: relative;
+		position: fixed;
 		top: 0;
 		left: 0;
+		z-index: 300;
+		min-height: 100%;
+		background: #fff;
 	}
 	.sendPost_title{
 		width: 100%;
+		background: #fff;
 	}
 	.sendPost_title>input{
 		    width: 100%;
@@ -79,6 +83,9 @@
 		position: relative;
 		top: 0;
 		left: 0;
+		z-index: 300;
+		background: #fff;
+		height: 5.32rem;
 	}
 	.sendPost_content_place{
 		position: absolute;
@@ -88,6 +95,8 @@
 	    z-index: 99;
 	    color: #c5c5c5 !important;
 	    padding:0.1rem 0.2rem;
+	    z-index: 300;
+	    background: #fff;
 	}
 	.sendPost_textarea{
 		    outline: none;
@@ -100,8 +109,9 @@
 		   position: absolute;
 		   top: 0;
 		   left: 0;
-		   z-index: 100;
+		   
 		   background: transparent;
+		   z-index: 300;
 	}
 	.sendPost_btn{
 		    height: 0.5rem;
@@ -114,5 +124,6 @@
 		    position: fixed;
 		    left: 0;
 		    bottom: 0;
+		    z-index: 300;
 	}
 </style>

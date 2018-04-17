@@ -8,6 +8,9 @@ const  mutations={
 	},
 	[types.CURRUSER](state,currUser){
 		state.currUser=currUser
+	},
+	[types.CURRUSERICO](state,currUserIco){
+		state.currUserIco=currUserIco
 	}
 }
 export default mutations

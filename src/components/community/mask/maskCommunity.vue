@@ -1,5 +1,5 @@
 <template>
-	<div class="maskCommunity">
+	<div class="maskCommunity" @touchmove.prevent>
 		<div class="maskCommunity_content">
 			<textarea ref="textarea" class="maskCommunity_content_textarea" name="content" placeholder="说两句..." autofocus="autofocus"></textarea>
 	        <p>

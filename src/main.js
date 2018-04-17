@@ -7,10 +7,12 @@ import store from "./store"
 import resource from 'vue-resource'
 import MintUI from 'mint-ui'
 //import 'mint-ui/lib/style.css' //引入出错
-
+import $ from 'jquery'
+import VueScrollLock from 'vue-scroll-lock'
 
 Vue.use(MintUI)
 Vue.use(resource)
+Vue.use(VueScrollLock)
 
 Vue.config.productionTip = false
 

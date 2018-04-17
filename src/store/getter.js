@@ -7,5 +7,8 @@ export default{
 	},
 	currUser:(state)=>{
 		return state.currUser
+	},
+	currUserIco:(state)=>{
+		return state.currUserIco
 	}
 }

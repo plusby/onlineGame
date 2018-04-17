@@ -90,6 +90,7 @@
 			<!--@backMaskflage接收子级发送的事件-->
 			<maskCommunity :maskflage="maskflage" @backMaskflage="backMaskflage" @backmsg="backmsg"></maskCommunity>
 		</div>
+		<p class="prompt" v-if="prompt">{{prompt}}</p>
 	</div>
 </template>
 
@@ -97,6 +98,7 @@
 	import { mapState,mapGetters,mapMutations} from 'vuex';
 	import getData from '../../../api/getData'
 	import maskCommunity from "../mask/maskCommunity"
+	import getRoutePath from '../../../common/js/getRoutePath'
 	export default{
 		props:{
 			
@@ -121,14 +123,13 @@
 				pos:{
 					viewPostIndex:0,
 					mainIndex:0
-				}
+				},
+				prompt:""
 			}
 		},
 		components:{
 			maskCommunity
-		},
-		watch: {
-		},
+		},		
 		created(){
 			/*const ERRNO=0			
 			this.$http.get("/api/data").then((res)=>{
@@ -197,11 +198,14 @@
 					}
 					
 				})
+		   
+			    window.scrollTo(0, 0)
+			
 			
 		},
 		computed:{
 			//获取到vuex中的state中的属性
-			...mapGetters(['currName','currIco'])
+			...mapGetters(['currName','currIco','currUserIco'])
 		},
 		methods:{
 			//开关小图标按钮
@@ -210,7 +214,17 @@
 			},
 			//显示弹出层
 			showMask(){
+				console.log(this.$store.getters.currUser)
+				if(this.$store.getters.currUser==""){
+					console.log(222222222)
+					this.prompt="请先去登录"
+					setTimeout(()=>{
+						this.prompt=""
+					},1000)
+					return
+				}
 				this.maskflage=true
+				
 			},
 			//子级发送的事件
 			backMaskflage(data){
@@ -235,7 +249,7 @@
 			//向数据中添加回复的内容
 			backmsg(data){
 				this.currentData.push({
-					 "ico":"http://ctimg.5fun.com/upload/images//headportraitv3/20180327/7e73f31b378f6d8b856b940f3e58fe8f_1522140589.jpg",
+					 "ico":this.$store.getters.currUserIco,
 			         "username":"mememememe",
 			         "time":"2017-11-14 19:26:43",
 			         "content":data
@@ -276,6 +290,7 @@
 		left: 0;
 		background-color:#F4F4F4;
 		min-height: 100%;
+		z-index: 300;
 	}
 	.communityIndex_top{
 		width: 100%;
@@ -574,5 +589,17 @@
 	 * */
 	.communityIndex_mask{
 		width: 100%;
+	}
+	.prompt{
+		width: 50%;
+		line-height: 0.3rem;
+		background: #000;
+		position: fixed;
+		top: 50%;
+		left: 25%;
+		transform: translate(0,-50%);
+		color: #fff;
+		font-size: 0.14rem;
+		text-align: center;
 	}
 </style>

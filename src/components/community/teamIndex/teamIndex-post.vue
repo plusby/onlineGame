@@ -4,7 +4,7 @@
 		<ul v-if="currentData">
 			<li v-for="(item,index) in currentData.main">
 				<!--路由传参-->
-				<router-link :to="{ name:'communityIndex',params:{id:item.id,api:teamDataApi } }">
+				<router-link :to="{ name:'/wzsjIndex/teamIndex/communityIndex',params:{id:item.id,api:teamDataApi } }">
 				<h4 class="teamIndex_post_head">
 					{{item.content.contentName}}
 				</h4>
@@ -37,7 +37,7 @@
 				</router-link>
 			</li>		
 		</ul>
-		<div class="teamIndex_post_more" @click="postMore($event)" >
+		<div class="teamIndex_post_more" @click="postMore($event)" v-if="data.length>0">
 			加载更多>>
 		</div>
 		

@@ -1,5 +1,5 @@
 <template>
-	<div class="phoneMsg">
+	<div class="phoneMsg" @touchmove.prevent>
 		<ul>
 			<li>
 				<input class="tel_input" type="tel" placeholder="请输入11位手机号码">
