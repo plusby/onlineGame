@@ -3,3 +3,8 @@
 	<span v-if="contentData[index]&&item.contentName==contentData[index].content.contentName" class="teamIndex_content_list_tag">
 			<em  v-for="(val,i) in contentData[index].content.tag" >{{ val  }}</em>	
 	</span>
+
+2.动画形式跳转路由
+
+      要跳转的路由必须为当前路由的子路由，在当前路由页面使用router-view存放要跳转路由的位置
+      
